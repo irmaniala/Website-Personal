@@ -36,30 +36,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pelaksanaan_rekomendasi = $_POST['pelaksanaan_rekomendasi'];
     $anggaran = $_POST['anggaran'];
 
-    // Menangani upload gambar
-    if (isset($_FILES['gambar']) && $_FILES['gambar']['error'] === UPLOAD_ERR_OK) {
-        $fileTmpPath = $_FILES['gambar']['tmp_name'];
+    /// Cek apakah ada gambar yang di-upload
+    if (isset($_FILES['gambar']) && $_FILES['gambar']['error'] == 0) {
+        // Mendapatkan nama file dan ekstensi
         $fileName = $_FILES['gambar']['name'];
-        $fileSize = $_FILES['gambar']['size'];
-        $fileType = $_FILES['gambar']['type'];
-        $fileNameCmps = explode(".", $fileName);
-        $fileExtension = strtolower(end($fileNameCmps));
+        $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
-        // Definisikan ekstensi yang diizinkan
-        $allowedfileExtensions = array('jpg', 'jpeg', 'png', 'gif');
+        // Daftar ekstensi yang diizinkan
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
 
-        if (in_array($fileExtension, $allowedfileExtensions)) {
-            // Tentukan lokasi upload
-            $uploadFileDir = 'uploads/';
-            // Pastikan direktori upload ada
-            if (!is_dir($uploadFileDir)) {
-                mkdir($uploadFileDir, 0755, true);
-            }
-            $newFileName = md5(time() . $fileName) . '.' . $fileExtension;
-            $dest_path = $uploadFileDir . $newFileName;
+        // Pengecekan ekstensi
+        if (!in_array($fileExtension, $allowedExtensions)) {
+            echo "Error: Ekstensi file tidak diizinkan. Hanya JPG, JPEG, PNG, dan GIF yang diperbolehkan.";
+            exit();
+        }
 
-            // Pindahkan file yang diupload
-            if(move_uploaded_file($fileTmpPath, $dest_path)) {
+         // Menentukan jalur untuk menyimpan file
+         $target_file = 'uploads/' . basename($fileName);
+
+             // Pindahkan file yang di-upload ke folder uploads
+        if (move_uploaded_file($_FILES['gambar']['tmp_name'], $target_file)) {
 
                 // Siapkan query dengan prepared statements
                 $sql = "INSERT INTO data_tersangka 
@@ -92,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $jenis_rehab,
                     $pelaksanaan_rekomendasi,
                     $anggaran,
-                    $dest_path
+                    $fileName
                 );
                 
 
@@ -114,7 +110,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         echo "Error: Tidak ada gambar yang diunggah atau terjadi kesalahan saat mengunggah.";
     }
-} 
 
 $conn->close();
 ?>
