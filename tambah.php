@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (in_array($fileExtension, $allowedfileExtensions)) {
             // Tentukan lokasi upload
-            $uploadFileDir = './uploads/';
+            $uploadFileDir = 'uploads/';
             // Pastikan direktori upload ada
             if (!is_dir($uploadFileDir)) {
                 mkdir($uploadFileDir, 0755, true);
@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($stmt->execute()) {
                     // Redirect ke halaman tambah.php setelah data ditambahkan
-                    header("Location: tambah.php");
+                    header("Location: home.php");
                     exit();
                 } else {
                     echo "Error: " . htmlspecialchars($stmt->error);
@@ -218,8 +218,8 @@ $conn->close();
             <option value="non_dipa">Non DIPA</option>
         </select>
 
-        <label for="gambar">UPLOAD GAMBAR</label>
-        <input type="file" name="gambar" id="gambar" accept=".jpg, .jpeg, .png, .pdf" required>
+        <label for="gambar">Upload Gambar</label>
+        <input type="file" name="gambar" id="gambar" required>
 
         <!-- Container untuk tombol Simpan dan Batal -->
         <div class="button-group">
@@ -229,48 +229,7 @@ $conn->close();
     </form>
 </div>
 
-<script>
-    function toggleRehabOptions() {
-        const rekomendasi = document.getElementById('rekomendasi').value;
-        const rehabOptions = document.getElementById('rehab-options');
-        if (rekomendasi === 'Rehabilitasi') {
-            rehabOptions.classList.remove('hidden');
-        } else {
-            rehabOptions.classList.add('hidden');
-            document.getElementById('jenis_rehab').value = '';
-        }
-    }
-
-    document.getElementById('jenis_narkotika').addEventListener('change', function() {
-    const selectElement = this;
-    const customJenisNarkotikaInput = document.getElementById('custom_jenis_narkotika');
-    const customJenisNarkotikaLabel = document.getElementById('custom_jenis_narkotika_label');
-    
-    if (selectElement.value === 'other') {
-        customJenisNarkotikaInput.classList.remove('hidden');
-        customJenisNarkotikaLabel.classList.remove('hidden');
-    } else {
-        customJenisNarkotikaInput.classList.add('hidden');
-        customJenisNarkotikaLabel.classList.add('hidden');
-        customJenisNarkotikaInput.value = ''; // Clear the input field when another option is selected
-    }
-});
-
-
-    document.getElementById('pasal_yang_disangkakan').addEventListener('change', function() {
-        const selectElement = this;
-        const customPasalInput = document.getElementById('custom_pasal');
-        const customPasalLabel = document.getElementById('custom_pasal_label');
-        
-        if (selectElement.value === 'other') {
-            customPasalInput.style.display = 'block';
-            customPasalLabel.style.display = 'block';
-        } else {
-            customPasalInput.style.display = 'none';
-            customPasalLabel.style.display = 'none';
-            customPasalInput.value = ''; // Clear the input field when an option is selected
-        }
-    });
+<script src="js/tambah.js">
 </script>
 
 </body>
