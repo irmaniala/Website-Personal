@@ -4,15 +4,17 @@
 require_once('libraries/tcpdf/tcpdf.php');
 require 'config.php';
 
+ob_start();
 
 // Ambil data filter dan pencarian dari POST
 $minggu_filter = isset($_POST['minggu']) ? $_POST['minggu'] : '';
 $bulan_awal = isset($_POST['bulan_awal']) ? $_POST['bulan_awal'] : '';
 $bulan_akhir = isset($_POST['bulan_akhir']) ? $_POST['bulan_akhir'] : '';
-$tahun_filter = isset($_POST['tahun']) ? $_POST['tahun'] : '';
+$tahun_awal = isset($_POST['tahun_awal']) ? $_POST['tahun_awal'] : ''; 
+$tahun_akhir = isset($_POST['tahun_akhir']) ? $_POST['tahun_akhir'] : ''; 
 $jenis_narkotika_filter = isset($_POST['jenis_narkotika']) ? $_POST['jenis_narkotika'] : '';
 $instansi_pengirim_filter = isset($_POST['instansi_pengirim']) ? $_POST['instansi_pengirim'] : '';
-$cari = isset($_POST['cari']) ? $_POST['cari'] : '';
+$cari = isset($_POST['cari']) ? trim($_POST['cari']) : '';
 
 // Inisialisasi TCPDF
 $pdf = new TCPDF();
@@ -50,24 +52,25 @@ if ($minggu_filter) {
 }
 
 if ($bulan_awal && $bulan_akhir) {
-    if ($tahun_filter) {
-        // Filter rentang bulan dan tahun
-        $sql .= " AND (tanggal_pelaksanaan_asesmen_terpadu BETWEEN ? AND ?)";
-        // Format tanggal awal dan akhir
-        $tanggal_awal = $tahun_filter . '-' . str_pad($bulan_awal, 2, '0', STR_PAD_LEFT) . '-01';
-        $tanggal_akhir = date("Y-m-t", strtotime($tahun_filter . '-' . str_pad($bulan_akhir, 2, '0', STR_PAD_LEFT) . '-01'));
-        
-        // Menambahkan parameter tanggal awal dan akhir ke array parameter
-        $params[] = $tanggal_awal;
-        $params[] = $tanggal_akhir;
-        $types .= 'ss';
-    } else {
-        // Jika tahun tidak difilter, hanya rentang bulan tanpa tahun
-        $sql .= " AND (MONTH(tanggal_pelaksanaan_asesmen_terpadu) BETWEEN ? AND ?)";
-        $params[] = intval($bulan_awal);
-        $params[] = intval($bulan_akhir);
-        $types .= 'ii';
-    }
+    $sql .= " AND MONTH(tanggal_pelaksanaan_asesmen_terpadu) BETWEEN ? AND ?";
+    $params[] = intval($bulan_awal);
+    $params[] = intval($bulan_akhir);
+    $types .= 'ii';
+} elseif ($bulan_awal) {
+    $sql .= " AND MONTH(tanggal_pelaksanaan_asesmen_terpadu) = ?";
+    $params[] = intval($bulan_awal);
+    $types .= 'i';
+}
+
+if ($tahun_awal && $tahun_akhir) {
+    $sql .= " AND YEAR(tanggal_pelaksanaan_asesmen_terpadu) BETWEEN ? AND ?";
+    $params[] = intval($tahun_awal);
+    $params[] = intval($tahun_akhir);
+    $types .= 'ii';
+} elseif ($tahun_awal) {
+    $sql .= " AND YEAR(tanggal_pelaksanaan_asesmen_terpadu) = ?";
+    $params[] = intval($tahun_awal);
+    $types .= 'i';
 }
 
 if ($jenis_narkotika_filter) {
@@ -83,16 +86,25 @@ if ($instansi_pengirim_filter) {
 }
 
 if ($cari) {
-    $sql .= " AND (nomor_register LIKE ? OR nama_tersangka LIKE ?)";
-    $cari_like = '%' . $cari . '%';
-    $params[] = $cari_like;
-    $params[] = $cari_like;
-    $types .= 'ss';
+    if (is_numeric($cari)) {
+        $sql .= " AND nomor_register = ?";
+        $params[] = $cari;
+        $types .= 's';
+    } else {
+        $sql .= " AND nama_tersangka LIKE ?";
+        $cari_like = '%' . $cari . '%';
+        $params[] = $cari_like;
+        $types .= 's';
+    }
 }
 
 $sql .= " ORDER BY tanggal_pelaksanaan_asesmen_terpadu ASC, nomor_register ASC";
 
 $stmt = $conn->prepare($sql);
+
+if ($stmt === false) {
+    die("Prepare failed: " . htmlspecialchars($conn->error));
+}
 
 if (!empty($params)) {
     $stmt->bind_param($types, ...$params);
@@ -100,6 +112,13 @@ if (!empty($params)) {
 
 $stmt->execute();
 $result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    // Kode untuk menggenerate PDF dengan data yang diambil
+    // Misalnya menggunakan FPDF atau library lainnya
+} else {
+    echo "Tidak ada data yang tersedia untuk diekspor.";
+}
 
 // Buat tabel untuk data
 $tbl = '
