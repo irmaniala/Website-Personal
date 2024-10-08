@@ -1,12 +1,17 @@
 <?php
+
 // Sertakan library TCPDF
 require_once('libraries/tcpdf/tcpdf.php');
 require 'config.php';
 
+
 // Ambil data filter dan pencarian dari POST
 $minggu_filter = isset($_POST['minggu']) ? $_POST['minggu'] : '';
-$bulan_filter = isset($_POST['bulan']) ? $_POST['bulan'] : '';
+$bulan_awal = isset($_POST['bulan_awal']) ? $_POST['bulan_awal'] : '';
+$bulan_akhir = isset($_POST['bulan_akhir']) ? $_POST['bulan_akhir'] : '';
 $tahun_filter = isset($_POST['tahun']) ? $_POST['tahun'] : '';
+$jenis_narkotika_filter = isset($_POST['jenis_narkotika']) ? $_POST['jenis_narkotika'] : '';
+$instansi_pengirim_filter = isset($_POST['instansi_pengirim']) ? $_POST['instansi_pengirim'] : '';
 $cari = isset($_POST['cari']) ? $_POST['cari'] : '';
 
 // Inisialisasi TCPDF
@@ -44,16 +49,37 @@ if ($minggu_filter) {
     }
 }
 
-if ($bulan_filter) {
-    $sql .= " AND MONTH(tanggal_pelaksanaan_asesmen_terpadu) = ?";
-    $params[] = intval($bulan_filter);
-    $types .= 'i';
+if ($bulan_awal && $bulan_akhir) {
+    if ($tahun_filter) {
+        // Filter rentang bulan dan tahun
+        $sql .= " AND (tanggal_pelaksanaan_asesmen_terpadu BETWEEN ? AND ?)";
+        // Format tanggal awal dan akhir
+        $tanggal_awal = $tahun_filter . '-' . str_pad($bulan_awal, 2, '0', STR_PAD_LEFT) . '-01';
+        $tanggal_akhir = date("Y-m-t", strtotime($tahun_filter . '-' . str_pad($bulan_akhir, 2, '0', STR_PAD_LEFT) . '-01'));
+        
+        // Menambahkan parameter tanggal awal dan akhir ke array parameter
+        $params[] = $tanggal_awal;
+        $params[] = $tanggal_akhir;
+        $types .= 'ss';
+    } else {
+        // Jika tahun tidak difilter, hanya rentang bulan tanpa tahun
+        $sql .= " AND (MONTH(tanggal_pelaksanaan_asesmen_terpadu) BETWEEN ? AND ?)";
+        $params[] = intval($bulan_awal);
+        $params[] = intval($bulan_akhir);
+        $types .= 'ii';
+    }
 }
 
-if ($tahun_filter) {
-    $sql .= " AND YEAR(tanggal_pelaksanaan_asesmen_terpadu) = ?";
-    $params[] = intval($tahun_filter);
-    $types .= 'i';
+if ($jenis_narkotika_filter) {
+    $sql .= " AND jenis_narkotika = ?";
+    $params[] = $jenis_narkotika_filter;
+    $types .= 's';
+}
+
+if ($instansi_pengirim_filter) {
+    $sql .= " AND instansi_pengirim = ?";
+    $params[] = $instansi_pengirim_filter;
+    $types .= 's';
 }
 
 if ($cari) {
