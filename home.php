@@ -171,13 +171,11 @@ if ($data_available) {
             $params[] = $cari;
             $types .= 's';
         } else {
-            // Jika pencarian berupa nama tersangka, gunakan LIKE
-            $sql .= " AND nama_tersangka LIKE ?";
-            $cari_like = '%' . $cari . '%';
-            $params[] = $cari_like;
+            $sql .= " AND LOWER(nama_tersangka) LIKE LOWER(?)";
+            $params[] = "%" . $cari . "%";
             $types .= 's';
-        }
     }
+}   
 
     $sql .= " ORDER BY tanggal_pelaksanaan_asesmen_terpadu ASC, nomor_register ASC";
 
@@ -229,7 +227,8 @@ if ($data_available) {
 
     <!-- Container untuk kedua formulir -->
     <div class="form-container">
-        <!-- Formulir Filter Bulan, Tahun, dan Minggu -->
+        <button class="collapsible">Filter Data</button>
+        <div class="filter-content">
         <form action="" method="POST" class="filter-form">
             <input type="hidden" name="filter_submit" value="1">
             <div class="form-inline">
@@ -322,6 +321,7 @@ if ($data_available) {
                 <button type="submit">Tampilkan Data</button>
             </div>
         </form>
+        </div>
 
         <!-- Formulir Pencarian -->
         <form action="" method="POST" class="search-form">
