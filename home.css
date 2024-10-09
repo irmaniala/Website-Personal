@@ -1,0 +1,240 @@
+body {
+    font-family: 'Lora', serif;
+    background-color: #f6f6f7;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 40px auto;
+    background-color: #f6f6f7;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.form-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.filter-form, .search-form {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    flex: 1 1 45%;
+    min-width: 300px;
+}
+
+.search-container {
+    margin-bottom: 20px; 
+    display: flex;
+    justify-content: flex-end; 
+}
+
+.search-input {
+    width: 300px; 
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    border-radius: 50px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #4285f4;
+    box-shadow: 0 2px 8px rgba(66, 133, 244, 0.5);
+}
+
+.search-form button {
+    padding: 10px 15px;
+    border: none;
+    background-color: #0a1e51;
+    color: white;
+    border-radius: 50px; 
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-form button:hover {
+    background-color: #65819f;
+}
+
+.collapsible {
+    background-color: #10396d;
+    color: white;
+    cursor: pointer;
+    padding: 8px;
+    width: 40%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.collapsible:after {
+    content: '\002B'; /* simbol + */
+    font-size: 20px;
+    float: right;
+    margin-left: 20px;
+}
+
+.collapsible.active:after {
+    content: '\2212'; /* simbol - */
+}
+
+button {
+    color: white;
+    border: none;
+    padding: 4px 8px; /* Padding dikurangi */
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #65819f;
+}
+
+.filter-content {
+    padding: 8px;
+    display: none;
+    overflow: hidden;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.form-inline {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.form-inline label {
+    margin-right: 10px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.form-inline select, .form-inline input[type="text"], .form-inline button {
+    padding: 8px 12px;
+    font-size: 1em;
+    margin-right: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+.form-inline select {
+    background-color: #fff;
+}
+
+.form-inline input[type="text"] {
+    width: 200px;
+}
+
+.form-inline button {
+    background-color: #0a1e51;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-inline button:hover {
+    background-color: #65819f;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    text-align: center;
+    background-color: #10396d;
+    color: white;
+}
+
+.results-table .nomor {
+    width:15%;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #65819f;
+}
+
+td a {
+    text-decoration: none;
+    color: #007bff;
+    transition: color 0.3s ease;
+}
+
+td a:hover {
+    color: #0056b3;
+}
+
+.no-data {
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
+    color: #888;
+}
+
+.home-button {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: #0a1e51;
+    color: white;
+    padding: 5px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.home-button:hover {
+    background-color: #65819f;
+}
+
+.home-button::before {
+    content: '\2190'; 
+    font-size: 16px;
+}
