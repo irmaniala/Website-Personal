@@ -23,19 +23,26 @@ h1 {
 
 .form-container {
     display: flex;
-    justify-content: space-between;
+    gap: 10px;
+    padding: 10px;
+    align-items: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
     margin-bottom: 20px;
+    width: 100%;
 }
 
 .filter-form, .search-form {
-    background-color: #f9f9f9;
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     margin-bottom: 20px;
     flex: 1 1 45%;
     min-width: 300px;
+}
+
+.filter-form {
+    margin: 0;
 }
 
 .search-container {
@@ -53,6 +60,7 @@ h1 {
     font-size: 16px;
     outline: none;
     transition: border-color 0.3s ease;
+    margin-left: 10px;
 }
 
 .search-input:focus {
@@ -61,7 +69,8 @@ h1 {
 }
 
 .search-form button {
-    padding: 10px 15px;
+    padding: 10px 20px;
+    display: flex;
     border: none;
     background-color: #0a1e51;
     color: white;
@@ -101,13 +110,22 @@ h1 {
 button {
     color: white;
     border: none;
-    padding: 4px 8px; /* Padding dikurangi */
+    padding: 4px 8px; 
     cursor: pointer;
     border-radius: 5px;
 }
 
 button:hover {
     background-color: #65819f;
+}
+
+button.collapsible {
+    border: none;
+    cursor: pointer;
+    line-height: 1;
+    
+   
+    box-sizing: border-box;
 }
 
 .filter-content {
