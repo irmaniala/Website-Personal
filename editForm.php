@@ -66,7 +66,7 @@ $conn->close();
     <a href="lihat_formulir.php">form</a>
 
     <form id="formTersangka" action="updateForm.php" method="POST" enctype="multipart/form-data">
-    <input type="hidden" name="id" value="<?php echo $formulir_id; ?>">
+    <input type="hidden" name="id" value="<?php echo $id; ?>">
         <table class="info-table">
             <tr>
                 <td>Nama Tersangka</td>
@@ -154,7 +154,9 @@ $daftar_berkas = [
 
             echo "<td><input type=\"checkbox\" name=\"berkas_tidak_ada[$index][ada]\" value=\"1\" $ada_checked></td>";
             echo "<td><input type=\"checkbox\" name=\"berkas_tidak_ada[$index][tidak_ada]\" value=\"1\" $tidak_ada_checked></td>";
-            echo "<td><input type=\"file\" name=\"file_$index\" accept=\"image/jpeg, image/jpg, image/png, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document\">";
+            echo "<td>
+                <input type=\"file\" name=\"file_$index\" accept=\"image/jpeg, image/jpg, image/png, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document\">
+                <input type=\"hidden\" name=\"old_file_$index\" value=\"$file_name\">";
             if ($file_name) {
                 echo "<br><small>File saat ini: $file_name</small>";
             }
