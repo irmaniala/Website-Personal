@@ -9,6 +9,8 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 require 'config.php';
 
+include 'functions.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Ambil data dari form
     $nomor_register = $_POST['nomor_register'];
@@ -41,13 +43,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Mendapatkan nama file dan ekstensi
         $fileName = $_FILES['gambar']['name'];
         $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $fileSize = $_FILES['gambar']['size'];
 
         // Daftar ekstensi yang diizinkan
         $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
 
+        $maxFileSize = 2 * 1024 * 1024;
+
         // Pengecekan ekstensi
         if (!in_array($fileExtension, $allowedExtensions)) {
-            echo "Error: Ekstensi file tidak diizinkan. Hanya JPG, JPEG, PNG, dan GIF yang diperbolehkan.";
+            echo "<script>
+            alert('Ekstensi file tidak diizinkan. Hanya JPG, JPEG, PNG, dan GIF yang diperbolehkan.');
+            window.location.href = 'tambah.php';
+          </script>";
+            exit();
+        }
+
+            // Pengecekan ukuran file
+        if ($fileSize > $maxFileSize) {
+            echo "<script>
+                    alert('Ukuran file terlalu besar. Maksimum ukuran file adalah 2MB.');
+                    window.history.back();
+                </script>";
             exit();
         }
 
@@ -93,23 +110,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
 
                 if ($stmt->execute()) {
-                    // Redirect ke halaman tambah.php setelah data ditambahkan
-                    header("Location: home.php");
+                    // Tampilkan alert jika data berhasil ditambahkan
+                    echo "<script>
+                            alert('Data berhasil ditambahkan!');
+                            window.location.href = 'home.php'; // Redirect ke halaman home
+                          </script>";
                     exit();
                 } else {
                     echo "Error: " . htmlspecialchars($stmt->error);
-                }
+                }                
 
                 $stmt->close();
             } else {
-                echo "Error: Gagal mengunggah gambar.";
+                echo "<script> alert ('Gagal mengunggah gambar') </script>";
             }
-        } else {
-            echo "Error: Ekstensi file tidak diizinkan. Hanya JPG, JPEG, PNG, dan GIF yang diperbolehkan.";
-        }
-    } else {
-        echo "Error: Tidak ada gambar yang diunggah atau terjadi kesalahan saat mengunggah.";
-    }
+        } 
+    } 
 
 $conn->close();
 ?>
@@ -121,12 +137,69 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tambah Data</title>
     <link rel="stylesheet" href="css/tambah.css">
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 <body>
 
+<input type="checkbox" id="check">
+<div class="sidebar" id="sidebar">
+    <ul>
+        <li><a href="index.php">Home</a></li>
+        <li><a href="tambah.php">Riwayat Rehab</a></li>
+        <li><a href="home.php">Rekap Rehab</a></li>
+        <li class="dropdown">
+            <a href="#" class="dropdown-btn">Formulir TAT</a>
+            <div class="dropdown-content" id="dropdownMenu">
+                <a href="formulir.php">Formulir ada barang bukti</a>
+                <a href="formulir2.php">Formulir tidak ada barang bukti</a>
+            </div>
+        </li>
+        <li class="dropdown">
+            <a href="#" class="dropdown-btn">Riwayat Formulir</a>
+            <div class="dropdown-content" id="dropdownMenu">
+                <a href="lihat_formulir.php">Formulir ada barang bukti</a>
+                <a href="lihat_formulir2.php">Formulir tidak ada barang bukti</a>
+            </div>
+        </li>
+        <li><a href="logout.php">Logout</a></li>
+    </ul>
+</div>
+
+<header>
+    <div class="container">
+        <h1><a href="">Berantas</a></h1>
+        <ul>
+            <li><a href="index.php">Home</a></li>
+            <li><a href="tambah.php" class="<?php echo isActive('tambah.php'); ?>">Riwayat Rehab</a></li>
+            <li><a href="home.php">Rekap Rehab</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-btn">Formulir TAT</a>
+                <div class="dropdown-content" id="dropdownMenu">
+                    <a href="formulir.php">Formulir ada barang bukti</a>
+                    <a href="formulir2.php">Formulir tidak ada barang bukti</a>
+                </div>
+            </li>
+            <li class="dropdown">
+            <a href="#" class="dropdown-btn">Riwayat Formulir</a>
+            <div class="dropdown-content" id="dropdownMenu">
+                <a href="lihat_formulir.php">Formulir ada barang bukti</a>
+                <a href="lihat_formulir2.php">Formulir tidak ada barang bukti</a>
+            </div>
+        </li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+        
+        <!-- menu mobile -->
+        <label for="check" class="mobile-menu"><i class="fas fa-bars fa-2x"></i></label>
+    </div>
+</header>
+
 <div class="container">
-    <h1>Tambah Data</h1>
+    <h1>Riwayat Rehabilitasi</h1>
 
     <form method="POST" action="tambah.php" enctype="multipart/form-data">
         <label for="nomor_register">NOMOR REGISTER</label>
@@ -219,7 +292,7 @@ $conn->close();
         <!-- Container untuk tombol Simpan dan Batal -->
         <div class="button-group">
             <button type="submit">Simpan Data</button>
-            <a href="home.php" class="cancel-btn">Batal</a>
+            <a href="index.php" class="cancel-btn">Batal</a>
         </div>
     </form>
 </div>
