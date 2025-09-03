@@ -2,6 +2,12 @@
 // Menghubungkan ke config.php
 require 'config.php';
 
+if (isset($_GET['status']) && $_GET['status'] === 'success') {
+    echo "<script>alert('Data berhasil diubah!');</script>";
+    echo "<script>window.location.href = 'detail.php?id=" . htmlspecialchars($_GET['id']) . "';</script>";
+    exit();
+}
+
 // Cek apakah ID ada di URL
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
@@ -56,16 +62,13 @@ $conn->close();
 <body>
 
 <div class="container">
-    <h1>Detail</h1>
+    <h1>Data Personal Tersangka</h1>
         <!-- Tabel untuk menampilkan detail -->
         <table class="details-table">
             <tr class="no-border">
             <td colspan="2" class="photo">
-                <?php if (!empty($gambar) && file_exists('uploads/' . $gambar)): ?>
-                    <img src="uploads/<?php echo $gambar; ?>" alt="Foto Tersangka">
-                    <?php else: ?>
-                <p><strong>Foto Tersangka:</strong> Tidak ada foto yang di-upload atau file tidak ditemukan.</p>
-                <?php endif; ?>
+            <?php (!empty($gambar) && file_exists($gambar)) ?>
+                <img src="uploads/<?php echo $gambar; ?>" alt="Foto Tersangka">
                 </td>
             </tr>
             <tr>
@@ -131,8 +134,8 @@ $conn->close();
         </table>
         <div class="button-group">
         <a href="edit.php?id=<?php echo $id; ?>" class="btn">Edit</a>
-        <a href="delete.php?id=<?php echo $id; ?>" class="btn delete-btn" onclick="reirm('Apakah Anda yakin ingin menghapus data ini?');">Hapus</a>
-        <a href="home.php" class="btn back-btn">Kembali ke Daftar</a>
+        <a href="delete.php?id=<?php echo $id; ?>" class="btn delete-btn">Hapus</a>
+        <a href="index.php" class="btn back-btn">Selesai</a>
     </div>
     </div>
 </div>
