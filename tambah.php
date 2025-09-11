@@ -1,133 +1,53 @@
 <?php
 session_start();
 
-// Periksa apakah pengguna sudah login
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header("Location: login.php");
-    exit;
-}
-
 require 'config.php';
-
 include 'functions.php';
+require_once 'classes/log.php';
+
+requireLogin();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Ambil data dari form
-    $nomor_register = $_POST['nomor_register'];
-    $nama_tersangka = $_POST['nama_tersangka'];
-    $instansi_pengirim = $_POST['instansi_pengirim'];
-    $tanggal_penangkapan = $_POST['tanggal_penangkapan'];
-    $tanggal_permohonan_tat = $_POST['tanggal_permohonan_tat'];
-    $tanggal_pelaksanaan_asesmen_terpadu = $_POST['tanggal_pelaksanaan_asesmen_terpadu'];
-    $tanggal_rekomendasi = $_POST['tanggal_rekomendasi'];
-    $jenis_narkotika = $_POST['jenis_narkotika'];
-    if ($jenis_narkotika === 'other') {
-        $jenis_narkotika = $_POST['custom_jenis_narkotika'];
-    }
-    $berat_barang_bukti = $_POST['berat_barang_bukti'];
-    $pasal_yang_disangkakan = $_POST['pasal_yang_disangkakan'];
-    if ($pasal_yang_disangkakan === 'other') {
-        $pasal_yang_disangkakan = $_POST['custom_pasal'];
-    }
-    $hasil_rekomendasi_tat = $_POST['hasil_rekomendasi_tat'];
-    $rekomendasi = $_POST['rekomendasi'];
-    $jenis_rehab = '';
-    if ($rekomendasi === 'Rehabilitasi') {
-        $jenis_rehab = $_POST['jenis_rehab'];
-    }
-    $pelaksanaan_rekomendasi = $_POST['pelaksanaan_rekomendasi'];
-    $anggaran = $_POST['anggaran'];
+    $data = [
+        'nomor_register' => $_POST['nomor_register'],
+        'nama_tersangka' => $_POST['nama_tersangka'],
+        'instansi_pengirim' => $_POST['instansi_pengirim'],
+        'tanggal_penangkapan' => $_POST['tanggal_penangkapan'],
+        'tanggal_permohonan_tat' => $_POST['tanggal_permohonan_tat'],
+        'tanggal_pelaksanaan_asesmen_terpadu' => $_POST['tanggal_pelaksanaan_asesmen_terpadu'],
+        'tanggal_rekomendasi' => $_POST['tanggal_rekomendasi'],
+        'jenis_narkotika' => $_POST['jenis_narkotika'] === 'other' ? $_POST['custom_jenis_narkotika'] : $_POST['jenis_narkotika'],
+        'berat_barang_bukti' => $_POST['berat_barang_bukti'],
+        'pasal_yang_disangkakan' => $_POST['pasal_yang_disangkakan'] === 'other' ? $_POST['custom_pasal'] : $_POST['pasal_yang_disangkakan'],
+        'hasil_rekomendasi_tat' => $_POST['hasil_rekomendasi_tat'],
+        'rekomendasi' => $_POST['rekomendasi'],
+        'jenis_rehab' => $_POST['rekomendasi'] === 'Rehabilitasi' ? $_POST['jenis_rehab'] : '',
+        'pelaksanaan_rekomendasi' => $_POST['pelaksanaan_rekomendasi'],
+        'anggaran' => $_POST['anggaran']
+    ];
 
-    /// Cek apakah ada gambar yang di-upload
+    // upload gambar
     if (isset($_FILES['gambar']) && $_FILES['gambar']['error'] == 0) {
-        // Mendapatkan nama file dan ekstensi
-        $fileName = $_FILES['gambar']['name'];
-        $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        $fileSize = $_FILES['gambar']['size'];
-
-        // Daftar ekstensi yang diizinkan
-        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-
-        $maxFileSize = 2 * 1024 * 1024;
-
-        // Pengecekan ekstensi
-        if (!in_array($fileExtension, $allowedExtensions)) {
-            echo "<script>
-            alert('Ekstensi file tidak diizinkan. Hanya JPG, JPEG, PNG, dan GIF yang diperbolehkan.');
-            window.location.href = 'tambah.php';
-          </script>";
+        $uploadResult = uploadImage($_FILES['gambar']);
+        if (isset($uploadResult['error'])) {
+            echo "<script>alert('{$uploadResult['error']}'); window.history.back();</script>";
             exit();
         }
+        $gambar = $uploadResult['filename'];
 
-            // Pengecekan ukuran file
-        if ($fileSize > $maxFileSize) {
-            echo "<script>
-                    alert('Ukuran file terlalu besar. Maksimum ukuran file adalah 2MB.');
-                    window.history.back();
-                </script>";
-            exit();
-        }
+        $insertResult = insertDataTersangka($conn, $data, $gambar);
 
-         // Menentukan jalur untuk menyimpan file
-         $target_file = 'uploads/' . basename($fileName);
-
-             // Pindahkan file yang di-upload ke folder uploads
-        if (move_uploaded_file($_FILES['gambar']['tmp_name'], $target_file)) {
-
-                // Siapkan query dengan prepared statements
-                $sql = "INSERT INTO data_tersangka 
-                        (nomor_register, nama_tersangka, instansi_pengirim, tanggal_penangkapan, tanggal_permohonan_tat, 
-                         tanggal_pelaksanaan_asesmen_terpadu, tanggal_rekomendasi, jenis_narkotika, berat_barang_bukti, 
-                         pasal_yang_disangkakan, hasil_rekomendasi_tat, rekomendasi, jenis_rehab, pelaksanaan_rekomendasi, 
-                         anggaran, gambar)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-                $stmt = $conn->prepare($sql);
-                if ($stmt === false) {
-                    die("Prepare failed: " . htmlspecialchars($conn->error));
-                }
-
-                // Bind parameter
-                $stmt->bind_param(
-                    "isssssssdsssssss",
-                    $nomor_register,
-                    $nama_tersangka,
-                    $instansi_pengirim,
-                    $tanggal_penangkapan,
-                    $tanggal_permohonan_tat,
-                    $tanggal_pelaksanaan_asesmen_terpadu,
-                    $tanggal_rekomendasi,
-                    $jenis_narkotika,
-                    $berat_barang_bukti,
-                    $pasal_yang_disangkakan,
-                    $hasil_rekomendasi_tat,
-                    $rekomendasi,
-                    $jenis_rehab,
-                    $pelaksanaan_rekomendasi,
-                    $anggaran,
-                    $fileName
-                );
-                
-
-                if ($stmt->execute()) {
-                    // Tampilkan alert jika data berhasil ditambahkan
-                    echo "<script>
-                            alert('Data berhasil ditambahkan!');
-                            window.location.href = 'home.php'; // Redirect ke halaman home
-                          </script>";
-                    exit();
-                } else {
-                    echo "Error: " . htmlspecialchars($stmt->error);
-                }                
-
-                $stmt->close();
-            } else {
-                echo "<script> alert ('Gagal mengunggah gambar') </script>";
-            }
-        } 
-    } 
-
-$conn->close();
+if (isset($insertResult['success'])) {
+    echo "<script>alert('Data berhasil ditambahkan!'); 
+    window.location.href='home.php';</script>";
+    exit();
+} else {
+    echo "<script>alert('{$insertResult['error']}'); 
+    window.history.back();</script>";
+    exit;
+}
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -148,8 +68,9 @@ $conn->close();
 <input type="checkbox" id="check">
 <div class="sidebar" id="sidebar">
     <ul>
+        <li><a href="log_aktivitas.php">Log</a></li>
         <li><a href="index.php">Home</a></li>
-        <li><a href="tambah.php">Riwayat Rehab</a></li>
+        <li><a href="tambah.php" class="<?php echo isActive('tambah.php'); ?>">Riwayat Rehab</a></li>
         <li><a href="home.php">Rekap Rehab</a></li>
         <li class="dropdown">
             <a href="#" class="dropdown-btn">Formulir TAT</a>
@@ -173,6 +94,7 @@ $conn->close();
     <div class="container">
         <h1><a href="">Berantas</a></h1>
         <ul>
+        <li><a href="log_aktivitas.php">Log</a></li>
             <li><a href="index.php">Home</a></li>
             <li><a href="tambah.php" class="<?php echo isActive('tambah.php'); ?>">Riwayat Rehab</a></li>
             <li><a href="home.php">Rekap Rehab</a></li>
