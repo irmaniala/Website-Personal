@@ -1,14 +1,10 @@
 <?php
-// Tampilkan semua error (untuk debugging, sebaiknya dimatikan di produksi)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-// Mulai sesi
 session_start();
 
 // Menghubungkan ke config.php
 require 'config.php';
+require 'functions.php';
+require 'classes/log.php';
 
 // Set lokasi penyimpanan file
 $upload_dir = 'uploads/';
@@ -64,15 +60,25 @@ for ($i = 1; $i <= count($berkas_pengajuan); $i++) { // Sesuaikan loop dengan ju
         $file_path = $upload_dir . $file_name;
 
         // Validasi jenis file
-        $allowed_types = ['image/jpeg', 'image/png', 'application/pdf']; // Sesuaikan dengan kebutuhan Anda
+        $allowed_types = [
+            'image/jpeg', 
+            'image/png', 
+            'application/pdf', 
+            'application/msword', 
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+        
         if (in_array($_FILES["file_$i"]['type'], $allowed_types)) {
+
             if (move_uploaded_file($_FILES["file_$i"]['tmp_name'], $file_path)) {
-                // File berhasil diupload
+                // File berhasil dipindahkan, bisa beri pesan sukses jika perlu
             } else {
-                $file_path = ''; // Reset jika gagal upload
-            }
-        } else {
-            $file_path = ''; // Reset jika jenis file tidak diizinkan
+                // Catat error ke log file
+                error_log("Gagal memindahkan file: " . $_FILES["file_$i"]['name'] . " - Error: " . json_encode(error_get_last()), 3, "upload_errors.log");
+            
+                // Tampilkan pesan umum ke pengguna
+                echo "<script>alert('Gagal mengunggah file. Silakan coba lagi.');</script>";
+            }            
         }
     }
 
@@ -111,11 +117,12 @@ $stmt_select->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proses Formulir</title>
-    <link rel="stylesheet" href="css/prosesFormulir.css">
+    <link rel="stylesheet" href="css/prosesFormulir.css?v=<?php echo time(); ?>">
 </head>
 <body>
 
 <div class="container">
+<a href="index.php" class="home-button">Home</a>
     <h3>FORMULIR REGISTRASI KLIEN TAT PADA MASA PENANGKAPAN (APABILA DIDAPATKAN BARANG BUKTI)</h3>
 
     <!-- Tabel Informasi -->
@@ -211,6 +218,7 @@ $stmt_select->close();
                 <td>.....................</td>
             </tr>
     </table>
+
 </div>
 
 </body>
